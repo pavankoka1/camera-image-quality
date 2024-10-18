@@ -5,46 +5,65 @@ const CameraCapture = () => {
   const canvasRef = useRef(null);
   const [imageSrc, setImageSrc] = useState(null);
   const [imageQuality, setImageQuality] = useState(null);
+  const [maxWidth, setMaxWidth] = useState(null);
+  const [maxHeight, setMaxHeight] = useState(null);
 
   useEffect(() => {
-    const getVideo = async () => {
-      const constraints = {
-        video: {
-          facingMode: "user", // Use the front-facing camera
-          width: 1920, // Set a fixed width for maximum quality
-          height: 1080, // Set a fixed height for maximum quality
-        },
+    const getMaxVideoResolution = async () => {
+      const videoConstraints = {
+        video: true,
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoRef.current.srcObject = stream;
+      // request the stream with default resolution
+      const stream = await navigator.mediaDevices.getUserMedia(
+        videoConstraints
+      );
+      const videoTrack = stream.getVideoTracks()[0];
+      const { width, height } = videoTrack.getSettings();
 
-      // Set canvas size to match video size
-      videoRef.current.addEventListener("loadedmetadata", () => {
-        const { videoWidth, videoHeight } = videoRef.current;
-        canvasRef.current.width = videoWidth;
-        canvasRef.current.height = videoHeight;
-      });
-    };
+      // Log supported settings for debugging
+      console.log("Video settings:", videoTrack.getCapabilities());
 
-    getVideo();
+      // Set the maximum width and height found in settings
+      setMaxWidth(width);
+      setMaxHeight(height);
 
-    return () => {
-      if (videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
+      // Clean up
+      return () => {
         stream.getTracks().forEach((track) => track.stop());
-      }
+      };
     };
+
+    getMaxVideoResolution();
   }, []);
+
+  const startVideoStream = async () => {
+    const constraints = {
+      video: {
+        facingMode: "user",
+        width: { ideal: maxWidth },
+        height: { ideal: maxHeight },
+      },
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    videoRef.current.srcObject = stream;
+
+    videoRef.current.addEventListener("loadedmetadata", () => {
+      const { videoWidth, videoHeight } = videoRef.current;
+      canvasRef.current.width = videoWidth;
+      canvasRef.current.height = videoHeight;
+    });
+  };
 
   const captureImage = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    // Draw the video frame onto the canvas
+    // Capture the frame from the video
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Capture the canvas image as a PNG for lossless quality
+    // Capture the canvas image as a high-quality PNG
     const dataUrl = canvas.toDataURL("image/png");
     setImageSrc(dataUrl);
 
@@ -52,6 +71,12 @@ const CameraCapture = () => {
     const quality = Math.round((dataUrl.length * 3) / 4 / 1024);
     setImageQuality(quality + " KB");
   };
+
+  useEffect(() => {
+    if (maxWidth && maxHeight) {
+      startVideoStream();
+    }
+  }, [maxWidth, maxHeight]);
 
   return (
     <div
@@ -66,7 +91,7 @@ const CameraCapture = () => {
       }}
     >
       <p style={{ textAlign: "center" }}>
-        This image is captured using canvas by setting video quality to max
+        Capture high-resolution images from your camera.
       </p>
       <video ref={videoRef} autoPlay style={{ width: "100%" }} />
       <button onClick={captureImage}>Capture Photo</button>
