@@ -10,9 +10,9 @@ const CameraCapture = () => {
     const getVideo = async () => {
       const constraints = {
         video: {
-          facingMode: { exact: "user" }, // Request front camera
-          width: 1920,
-          height: 1080,
+          facingMode: { ideal: "user" }, // Changed to ideal
+          width: { ideal: 1280 }, // Ideal values
+          height: { ideal: 720 },
         },
       };
 
@@ -20,11 +20,13 @@ const CameraCapture = () => {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         videoRef.current.srcObject = stream;
 
-        // Set canvas size to match video size
         videoRef.current.addEventListener("loadedmetadata", () => {
           const { videoWidth, videoHeight } = videoRef.current;
           canvasRef.current.width = videoWidth;
           canvasRef.current.height = videoHeight;
+
+          // Ensure the video starts playing
+          videoRef.current.play();
         });
       } catch (error) {
         console.error("Error accessing the camera: ", error);
@@ -48,7 +50,7 @@ const CameraCapture = () => {
     // Draw the video frame onto the canvas
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Capture the canvas image as a PNG for lossless quality
+    // Capture the canvas image as a PNG
     const dataUrl = canvas.toDataURL("image/png");
     setImageSrc(dataUrl);
 
