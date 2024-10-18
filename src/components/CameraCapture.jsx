@@ -10,21 +10,25 @@ const CameraCapture = () => {
     const getVideo = async () => {
       const constraints = {
         video: {
-          facingMode: "user", // Use the front-facing camera
-          width: 1920, // Set a fixed width for maximum quality
-          height: 1080, // Set a fixed height for maximum quality
+          facingMode: { exact: "user" }, // Request front camera
+          width: 1920,
+          height: 1080,
         },
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoRef.current.srcObject = stream;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoRef.current.srcObject = stream;
 
-      // Set canvas size to match video size
-      videoRef.current.addEventListener("loadedmetadata", () => {
-        const { videoWidth, videoHeight } = videoRef.current;
-        canvasRef.current.width = videoWidth;
-        canvasRef.current.height = videoHeight;
-      });
+        // Set canvas size to match video size
+        videoRef.current.addEventListener("loadedmetadata", () => {
+          const { videoWidth, videoHeight } = videoRef.current;
+          canvasRef.current.width = videoWidth;
+          canvasRef.current.height = videoHeight;
+        });
+      } catch (error) {
+        console.error("Error accessing the camera: ", error);
+      }
     };
 
     getVideo();
