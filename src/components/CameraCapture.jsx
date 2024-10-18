@@ -10,8 +10,8 @@ const CameraCapture = () => {
     const getVideo = async () => {
       const constraints = {
         video: {
-          facingMode: { ideal: "user" }, // Changed to ideal
-          width: { ideal: 1280 }, // Ideal values
+          facingMode: { ideal: "user" },
+          width: { ideal: 1280 },
           height: { ideal: 720 },
         },
       };
@@ -25,8 +25,10 @@ const CameraCapture = () => {
           canvasRef.current.width = videoWidth;
           canvasRef.current.height = videoHeight;
 
-          // Ensure the video starts playing
-          videoRef.current.play();
+          // Attempt to play the video automatically
+          videoRef.current.play().catch((error) => {
+            console.error("Error attempting to play video: ", error);
+          });
         });
       } catch (error) {
         console.error("Error accessing the camera: ", error);
@@ -74,7 +76,13 @@ const CameraCapture = () => {
       <p style={{ textAlign: "center" }}>
         This image is captured using canvas by setting video quality to max
       </p>
-      <video ref={videoRef} autoPlay style={{ width: "100%" }} />
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        style={{ width: "100%" }}
+      />
       <button onClick={captureImage}>Capture Photo</button>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
       {imageSrc && (
