@@ -11,8 +11,8 @@ const CameraCapture = () => {
       const constraints = {
         video: {
           facingMode: { ideal: "user" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 640 }, // Set a lower width for lower resolution
+          height: { ideal: 480 }, // Set a lower height for lower resolution
         },
       };
 
@@ -25,7 +25,6 @@ const CameraCapture = () => {
           canvasRef.current.width = videoWidth;
           canvasRef.current.height = videoHeight;
 
-          // Attempt to play the video automatically
           videoRef.current.play().catch((error) => {
             console.error("Error attempting to play video: ", error);
           });
@@ -52,13 +51,15 @@ const CameraCapture = () => {
     // Draw the video frame onto the canvas
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Capture the canvas image as a PNG
-    const dataUrl = canvas.toDataURL("image/png");
+    // Directly export the canvas image as a JPEG with set quality
+    const dataUrl = canvas.toDataURL("image/jpeg", 1); // You can adjust the quality if needed.
+
+    // Set the image source
     setImageSrc(dataUrl);
 
-    // Estimate quality in KB
-    const quality = Math.round((dataUrl.length * 3) / 4 / 1024);
-    setImageQuality(quality + " KB");
+    // Estimate quality in KB for display
+    const estimatedSize = Math.round((dataUrl.length * 3) / 4 / 1024);
+    setImageQuality(estimatedSize + " KB");
   };
 
   return (
@@ -74,7 +75,7 @@ const CameraCapture = () => {
       }}
     >
       <p style={{ textAlign: "center" }}>
-        This image is captured using canvas by setting video quality to max
+        This image is captured using canvas with lower resolution settings.
       </p>
       <video
         ref={videoRef}
