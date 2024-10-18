@@ -13,7 +13,6 @@ function App() {
         gap: "32px",
         justifyContent: "center",
         alignItems: "center",
-        padding: "20px",
       }}
     >
       <CameraCapture />

@@ -59,11 +59,7 @@ const CameraCapture = () => {
       ></canvas>
       {imageSrc && (
         <>
-          <img
-            src={imageSrc}
-            alt="Captured"
-            style={{ marginTop: "10px", maxHeight: "300px" }}
-          />
+          <img src={imageSrc} alt="Captured" style={{ marginTop: "10px" }} />
           <div>Image Quality: {imageQuality}</div>
         </>
       )}
