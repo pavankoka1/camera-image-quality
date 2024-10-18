@@ -1,13 +1,26 @@
-import logo from "./logo.svg";
-import "./App.css";
-import CameraCapture from "./CameraCapture";
-import DefaultCameraCapture from "./DefaultCameraCapture";
+import CameraCapture from "./components/CameraCapture";
+import DefaultCameraCapture from "./components/DefaultCameraCapture";
+import ReactWebCam from "./components/ReactWebCam";
 
 function App() {
   return (
-    <div>
+    <div
+      style={{
+        width: "100vw",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        gap: "32px",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
       <CameraCapture />
+      <p style={{ height: "2px", width: "100vw", backgroundColor: "black" }} />
       <DefaultCameraCapture />
+      <p style={{ height: "2px", width: "100vw", backgroundColor: "black" }} />
+      <ReactWebCam />
     </div>
   );
 }
