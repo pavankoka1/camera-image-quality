@@ -8,8 +8,22 @@ const CameraCapture = () => {
 
   useEffect(() => {
     const getVideo = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Request the highest resolution available
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user", // front camera
+          width: { ideal: 1920 }, // maximum width
+          height: { ideal: 1080 }, // maximum height
+        },
+      });
+
       videoRef.current.srcObject = stream;
+
+      // Set canvas size based on the stream's video track settings
+      const videoTrack = stream.getVideoTracks()[0];
+      const { width, height } = videoTrack.getSettings();
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
     };
 
     getVideo();
@@ -25,12 +39,16 @@ const CameraCapture = () => {
   const captureImage = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
+
+    // Capture the video frame onto the canvas
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL("image/jpeg", 1.0); // Adjust quality from 0 to 1
+
+    // Get the data URL from the canvas at the highest quality setting
+    const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
     setImageSrc(dataUrl);
 
-    // To estimate quality
-    const quality = Math.round((dataUrl.length * 3) / 4 / 1024); // Convert bytes to KB
+    // Estimate quality in KB
+    const quality = Math.round((dataUrl.length * 3) / 4 / 1024);
     setImageQuality(quality + " KB");
   };
 
@@ -51,12 +69,7 @@ const CameraCapture = () => {
       </p>
       <video ref={videoRef} autoPlay style={{ width: "100%" }} />
       <button onClick={captureImage}>Capture Photo</button>
-      <canvas
-        ref={canvasRef}
-        style={{ display: "none" }}
-        width="640"
-        height="480"
-      ></canvas>
+      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
       {imageSrc && (
         <>
           <img src={imageSrc} alt="Captured" style={{ marginTop: "10px" }} />
