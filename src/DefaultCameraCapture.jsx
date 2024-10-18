@@ -38,7 +38,7 @@ const ImageCapture = () => {
       <img
         id="capturedImage"
         alt="Captured"
-        style={{ display: "none", marginTop: "10px", maxWidth: "100%" }}
+        style={{ display: "none", marginTop: "10px", maxHeight: "300px" }}
       />
     </div>
   );
