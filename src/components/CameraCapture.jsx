@@ -8,22 +8,23 @@ const CameraCapture = () => {
 
   useEffect(() => {
     const getVideo = async () => {
-      // Request the highest resolution available
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const constraints = {
         video: {
-          facingMode: "user", // front camera
-          width: { ideal: 1920 }, // maximum width
-          height: { ideal: 1080 }, // maximum height
+          facingMode: "user", // Use the front-facing camera
+          width: 1920, // Set a fixed width for maximum quality
+          height: 1080, // Set a fixed height for maximum quality
         },
-      });
+      };
 
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = stream;
 
-      // Set canvas size based on the stream's video track settings
-      const videoTrack = stream.getVideoTracks()[0];
-      const { width, height } = videoTrack.getSettings();
-      canvasRef.current.width = width;
-      canvasRef.current.height = height;
+      // Set canvas size to match video size
+      videoRef.current.addEventListener("loadedmetadata", () => {
+        const { videoWidth, videoHeight } = videoRef.current;
+        canvasRef.current.width = videoWidth;
+        canvasRef.current.height = videoHeight;
+      });
     };
 
     getVideo();
@@ -40,11 +41,11 @@ const CameraCapture = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    // Capture the video frame onto the canvas
+    // Draw the video frame onto the canvas
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Get the data URL from the canvas at the highest quality setting
-    const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
+    // Capture the canvas image as a PNG for lossless quality
+    const dataUrl = canvas.toDataURL("image/png");
     setImageSrc(dataUrl);
 
     // Estimate quality in KB
